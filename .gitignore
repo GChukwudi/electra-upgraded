@@ -1,0 +1,16 @@
+besu-23.10.3.tar.gz
+
+blockchain/config/nodes/*/data
+
+node_modules
+
+*.lock
+
+.env
+.env.local
+
+.vscode
+.idea/
+
+.DS_Store
+Thumbs.db

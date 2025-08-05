@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # INEC National Validator (Main Authority)
+  inec-national:
+    image: hyperledger/besu:23.10.3
+    container_name: inec-national
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/inec-national/data:/data
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --p2p-port=30303
+      --miner-enabled
+      --min-gas-price=0
+      --logging=INFO
+      --host-allowlist="*"
+
+  # State INEC Nodes (36 states + FCT = 37 nodes in real implementation)
+  inec-lagos:
+    image: hyperledger/besu:23.10.3
+    container_name: inec-lagos
+    ports:
+      - "8547:8547"
+      - "30304:30304"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/inec-lagos/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8547
+      --p2p-port=30304
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --miner-enabled
+      --logging=INFO
+      --host-allowlist="*"
+
+  # Party Representative Nodes (1 per major party at national level)
+  party-pdp-national:
+    image: hyperledger/besu:23.10.3
+    container_name: party-pdp-national
+    ports:
+      - "8548:8548"
+      - "30305:30305"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/party-pdp/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8548
+      --p2p-port=30305
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --logging=INFO
+      --host-allowlist="*"
+
+  party-apc-national:
+    image: hyperledger/besu:23.10.3
+    container_name: party-apc-national
+    ports:
+      - "8549:8549"
+      - "30306:30306"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/party-apc/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8549
+      --p2p-port=30306
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --logging=INFO
+      --host-allowlist="*"
+
+  party-lp-national:
+    image: hyperledger/besu:23.10.3
+    container_name: party-lp-national
+    ports:
+      - "8550:8550"
+      - "30307:30307"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/party-lp/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8550
+      --p2p-port=30307
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --logging=INFO
+      --host-allowlist="*"
+
+  party-nnpp-national:
+    image: hyperledger/besu:23.10.3
+    container_name: party-nnpp-national
+    ports:
+      - "8551:8551"
+      - "30308:30308"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/party-nnpp/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8551
+      --p2p-port=30308
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --logging=INFO
+      --host-allowlist="*"
+
+  # International Observer Node
+  international-observer:
+    image: hyperledger/besu:23.10.3
+    container_name: international-observer
+    ports:
+      - "8552:8552"
+      - "30309:30309"
+    volumes:
+      - ./blockchain/config:/config
+      - ./blockchain/nodes/observer/data:/data
+    depends_on:
+      - inec-national
+    command: >
+      --data-path=/data
+      --genesis-file=/config/genesis.json
+      --network-id=2027
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8552
+      --p2p-port=30309
+      --bootnodes=enode://INEC_NATIONAL_ENODE@inec-national:30303
+      --logging=INFO
+      --host-allowlist="*"
